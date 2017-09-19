@@ -6,12 +6,12 @@
 
 include make.inc
 
-all: f2clib lapack_install lib lapack_testing blas_testing
+all: f2clib cblaswrap lib
 #all: f2clib lapack_install lib lapack_testing blas_testing variants_testing
 
 #lib: lapacklib tmglib
 #lib: f2clib lapacklib tmglib
-lib: f2clib blaslib variants lapacklib tmglib
+lib: f2clib blaslib lapacklib
 
 clean: cleanlib cleantesting cleanblas_testing 
 
@@ -23,12 +23,12 @@ blaslib:
 	( cd BLAS/SRC; $(MAKE) )
 
 cblaswrap: 
-	( cd BLAS/WRAP; $(MAKE) libcblaswr.a; cp libcblaswr.a ../.. )
+	( cd BLAS/WRAP; $(MAKE) libcblaswr.bc; cp libcblaswr.bc ../.. )
 
 fblaswrap: 
 	( cd BLAS/WRAP; $(MAKE) libfblaswr.a; cp libfblaswr.a ../.. )
 
-lapacklib:	lapack_install
+lapacklib:
 	( cd SRC; $(MAKE) )
 
 variants:
@@ -56,7 +56,7 @@ variants_testing: lib
 	mv stest.out stest_lurec.out ; mv dtest.out dtest_lurec.out ; mv ctest.out ctest_lurec.out ; mv ztest.out ztest_lurec.out )
 	( cd TESTING ;  rm -f xlintst* ; $(MAKE)  VARLIB='SRC/VARIANTS/LIB/qrll.a' ; \
 	mv stest.out stest_qrll.out ; mv dtest.out dtest_qrll.out ; mv ctest.out ctest_qrll.out ; mv ztest.out ztest_qrll.out )
-		
+    
 blas_testing:
 	( cd BLAS/TESTING; $(MAKE) -f Makeblat1 )
 	( cd BLAS; ./xblat1s > sblat1.out    ; \

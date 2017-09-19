@@ -20,14 +20,13 @@ include $(TOPDIR)/make.inc
 # compile, then strip unnecessary symbols
 .c.o:
 	$(CC) -c -DSkip_f2c_Undefs $(CFLAGS) $*.c
-	ld -r -x -o $*.xxx $*.o
-	mv $*.xxx $*.o
+
 ## Under Solaris (and other systems that do not understand ld -x),
 ## omit -x in the ld line above.
 ## If your system does not have the ld command, comment out
 ## or remove both the ld and mv lines above.
 
-MISC =	f77vers.o i77vers.o main.o s_rnge.o abort_.o exit_.o getarg_.o iargc_.o\
+MISC =	f77vers.o i77vers.o s_rnge.o abort_.o exit_.o getarg_.o iargc_.o\
 	getenv_.o signal_.o s_stop.o s_paus.o system_.o cabs.o ctype.o\
 	derf_.o derfc_.o erf_.o erfc_.o sig_die.o uninit.o
 POW =	pow_ci.o pow_dd.o pow_di.o pow_hh.o pow_ii.o pow_ri.o pow_zi.o pow_zz.o
@@ -69,11 +68,10 @@ TIME =	dtime_.o etime_.o
 OFILES = $(MISC) $(POW) $(CX) $(DCX) $(REAL) $(DBL) $(INT) \
 	$(HALF) $(CMP) $(EFL) $(CHAR) $(I77) $(TIME)
 
-all: f2c.h signal1.h sysdep1.h libf2c.a clapack_install
+all: f2c.h signal1.h sysdep1.h libf2c.bc clapack_install
 
-libf2c.a: $(OFILES)
-	ar r libf2c.a $?
-	-ranlib libf2c.a
+libf2c.bc: $(OFILES)
+	$(LD) $(LDFLAGS) -o libf2c.bc $?
 
 ## Shared-library variant: the following rule works on Linux
 ## systems.  Details are system-dependent.  Under Linux, -fPIC
@@ -82,7 +80,7 @@ libf2c.a: $(OFILES)
 ## of "cc -shared".
 
 libf2c.so: $(OFILES)
-	cc -shared -o libf2c.so $(OFILES)
+	$(LD) $(LDFLAGS) -shared -o libf2c.so $(OFILES)
 
 ### If your system lacks ranlib, you don't need it; see README.
 
@@ -117,15 +115,14 @@ sysdep1.h: sysdep1.h0
 #main.o: main.c
 #	$(CC) -c -Donexit=on_exit -DSkip_f2c_Undefs main.c
 
-install: libf2c.a
-	cp libf2c.a $(LIBDIR)
-	-ranlib $(LIBDIR)/libf2c.a
+install: libf2c.bc
+	cp libf2c.bc $(LIBDIR)
 
-clapack_install: libf2c.a
-	mv libf2c.a ..
+clapack_install: libf2c.bc
+	mv libf2c.bc ..
 
 clean:
-	rm -f libf2c.a *.o arith.h signal1.h sysdep1.h
+	rm -f libf2c.bc *.o arith.h signal1.h sysdep1.h
 
 backspac.o:	fio.h
 close.o:	fio.h
